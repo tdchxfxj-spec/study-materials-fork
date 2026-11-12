@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ] # 每次推送到 main 分支时自动触发
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -22,12 +22,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 设置 GitHub Pages 环境
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
-      - name: 上传静态文件
+      - name: 上传网站文件
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # 纯静态 Markdown/HTML 文件直接用根目录
+          path: site
 
   deploy:
     environment:
