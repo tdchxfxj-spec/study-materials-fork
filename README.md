@@ -60,12 +60,19 @@ docs/                   技术说明与维护记录
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm dev             # 前端开发
-pnpm app:dev         # 桌面应用开发
-pnpm build           # 类型检查与前端构建
+pnpm dev                 # 仅启动 Vite 前端开发服务器
+pnpm build               # 类型检查与前端构建
+
+# Windows / Linux 桌面端
+pnpm app:dev
+pnpm app:build
+
+# macOS 桌面端（必须加载 macOS 窗口配置）
+pnpm app:dev:macos
+pnpm app:build:macos     # 生成 .app / .dmg
 ```
 
-各平台配置位于 `src-tauri/tauri*.conf.json`。移动端及 macOS 开发需要相应平台的 SDK 和工具链。
+各平台配置位于 `src-tauri/tauri*.conf.json`。macOS 使用单独的窗口配置：Rust 启动代码会自行创建主窗口，因此必须加载 `tauri.macos.conf.json` 中的 `create: false`，避免 Tauri 自动创建重复窗口。移动端及 macOS 开发需要相应平台的 SDK 和工具链。
 
 - exFAT 等不支持符号链接的文件系统需保留 `.npmrc` 中的 `node-linker=hoisted`；部分原生构建步骤仍可能受文件系统限制。
 - 依赖安装脚本的允许列表见 `package.json` 与 `pnpm-workspace.yaml`。
