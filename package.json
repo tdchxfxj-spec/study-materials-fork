@@ -16,7 +16,9 @@
     "android:init": "tauri android init",
     "android:icons": "node scripts/sync-android-icons.mjs",
     "android:dev": "tauri android dev",
-    "android:build": "tauri android build"
+    "android:build": "tauri android build",
+    "app:dev:macos": "tauri dev --config src-tauri/tauri.macos.conf.json",
+    "app:build:macos": "tauri build --config src-tauri/tauri.macos.conf.json"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.12.4",
