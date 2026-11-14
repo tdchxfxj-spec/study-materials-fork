@@ -82,7 +82,7 @@ async function command(request: Request, env: Env, sid: string, cmd: string) {
     case "debug_log": result = null; break;
     case "net_diag": result = { mode: "cloudflare-worker", ok: true }; break;
     case "cache_clear": result = null; break;\n    case "playback_log_status": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_set": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_write": result = null; break;\n    case "playback_log_read": result = ""; break;
-    case "open_url": result = null; break;
+    case "open_url": result = null; break;\n    case "set_orientation": result = null; break;\n    case "plugin:app|exit": result = null; break;
     case "line_state": result = { base: s.origin, default: DEFAULT_ORIGIN, fixed: FIXED }; break;
     case "line_set": {
       const next = safeOrigin(String(args.url ?? ""));
@@ -259,7 +259,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/__api/") || url.pathname.startsWith("/__media/")) {
       const origin = request.headers.get("origin");
-      if (origin && origin !== url.origin) return error("origin denied",403);
+      if ((url.pathname.startsWith("/__api/") && origin !== url.origin) || (origin && origin !== url.origin)) return error("origin denied",403);
       let sid = getSid(request), isNew = false;
       if (!sid || !/^[a-f0-9-]{36}$/i.test(sid)) { sid = crypto.randomUUID(); isNew = true; }
       const path = url.pathname;
