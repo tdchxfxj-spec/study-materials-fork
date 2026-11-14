@@ -3,7 +3,7 @@ interface Env {
   SESSIONS: DurableObjectNamespace;
   UPSTREAM_DEFAULT?: string;
 }
-type Session = { origin: string; token: string; user: unknown; hosts: string[] };
+type Session = { origin: string; token: string; user: unknown; hosts: string[]; lineHosts?: string[] };
 const DEFAULT_ORIGIN = "https://huangguoai.com";
 const FIXED = [
   { name: "固定线路 1", url: "https://huangguoai.com" },
@@ -13,9 +13,9 @@ const COOKIE = "__Host-hghub_sid";
 const json = (value: unknown, status = 200, headers: HeadersInit = {}) =>
   new Response(JSON.stringify(value), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers } });
 const error = (message: string, status = 400) => json({ error: message }, status);
-const safeOrigin = (raw: string) => {
+const safeOrigin = (raw: string, mirrorHosts: string[] = []) => {
   const u = new URL(raw);
-  if (u.protocol !== "https:" || u.username || u.password || !["huangguoai.com", "huangguoai.ai"].includes(u.hostname)) {
+  if (u.protocol !== "https:" || u.username || u.password || !["huangguoai.com", "huangguoai.ai", ...mirrorHosts].includes(u.hostname)) {
     throw new Error("不允许使用该数据源线路");
   }
   return u.origin;
@@ -81,18 +81,18 @@ async function command(request: Request, env: Env, sid: string, cmd: string) {
     case "security_set": result = true; break;
     case "debug_log": result = null; break;
     case "net_diag": result = { mode: "cloudflare-worker", ok: true }; break;
-    case "cache_clear": result = null; break;
+    case "cache_clear": result = null; break;\n    case "playback_log_status": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_set": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_write": result = null; break;\n    case "playback_log_read": result = ""; break;
     case "open_url": result = null; break;
     case "line_state": result = { base: s.origin, default: DEFAULT_ORIGIN, fixed: FIXED }; break;
     case "line_set": {
       const next = safeOrigin(String(args.url ?? ""));
       s.origin = next; s.token = ""; s.user = null; await putSession(env, sid, s); result = next; break;
     }
-    case "line_mirrors": result = await mirrors(); break;
+    case "line_mirrors": { const data = await mirrors(); s.lineHosts = data.items.map(x => x.host); await putSession(env, sid, s); result = data; break; }
     case "line_probe": {
       const urls = Array.isArray(args.urls) ? args.urls.slice(0, 60) : [];
       result = await Promise.all(urls.map(async raw => {
-        try { const u = safeOrigin(String(raw)); const start = Date.now(); const r = await fetch(u + "/", { method: "HEAD", redirect: "error" }); return { url: u, ok: r.status < 400, status: r.status, ms: Date.now() - start }; }
+        try { const u = safeOrigin(String(raw), s.lineHosts ?? []); const start = Date.now(); const r = await fetch(u + "/", { method: "HEAD", redirect: "error" }); return { url: u, ok: r.status < 400, status: r.status, ms: Date.now() - start }; }
         catch (e) { return { url: String(raw), ok: false, ms: 0, error: String(e) }; }
       })); break;
     }
