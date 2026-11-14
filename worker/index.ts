@@ -91,7 +91,7 @@ async function command(request: Request, env: Env, sid: string, cmd: string) {
     case "plugin:app|exit": result = null; break;
     case "line_state": result = { base: s.origin, default: DEFAULT_ORIGIN, fixed: FIXED }; break;
     case "line_set": {
-      const next = safeOrigin(String(args.url ?? ""));
+      const next = safeOrigin(String(args.url ?? ""), s.lineHosts ?? []);
       s.origin = next; s.token = ""; s.user = null; await putSession(env, sid, s); result = next; break;
     }
     case "line_mirrors": { const data = await mirrors(); s.lineHosts = data.items.map(x => x.host); await putSession(env, sid, s); result = data; break; }
