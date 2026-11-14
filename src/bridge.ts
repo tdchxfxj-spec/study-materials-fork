@@ -6,7 +6,15 @@ declare global {
 export const isTauri = typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
 
 export async function invoke<T = unknown>(command: string, args?: Record<string, unknown>): Promise<T> {
-  if (isTauri) return tauriInvoke<T>(command, args);\n  if (command === "open_url") {\n    const raw = String(args?.url ?? "");\n    const url = new URL(raw);\n    if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("只允许打开 HTTP(S) 链接");\n    window.open(url.toString(), "_blank", "noopener,noreferrer");\n    return undefined as T;\n  }\n  if (command === "plugin:app|exit" || command === "set_orientation") return undefined as T;
+  if (isTauri) return tauriInvoke<T>(command, args);
+  if (command === "open_url") {
+    const raw = String(args?.url ?? "");
+    const url = new URL(raw);
+    if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("只允许打开 HTTP(S) 链接");
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
+    return undefined as T;
+  }
+  if (command === "plugin:app|exit" || command === "set_orientation") return undefined as T;
   const response = await fetch(`/__api/command/${encodeURIComponent(command)}`, {
     method: "POST",
     credentials: "same-origin",
