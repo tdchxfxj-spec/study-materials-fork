@@ -190,9 +190,9 @@ async function mirrors() {
     return m ? [...m[1].matchAll(/['"]([^'"]+)['"]/g)].map(x => x[1]) : [];
   };
   const domains = arr("urls"), subs = arr("subdomains"), items: {url:string;host:string}[] = [];
-  for (const domain of domains) for (const host of (subs.length ? subs.map(x=>`${x}.${domain.replace(/\/$/,"")}`) : [domain.replace(/\/$/,"")])) {
+  outer: for (const domain of domains) for (const host of (subs.length ? subs.map(x=>`${x}.${domain.replace(/\/$/,"")}`) : [domain.replace(/\/$/,"")])) {
     if (!items.some(x=>x.host===host)) items.push({url:`https://${host}`,host});
-    if (items.length >= 60) break;
+    if (items.length >= 60) break outer;
   }
   if (!items.length) throw new Error("地址发布页里没有可用的镜像地址");
   return { source: "https://huangguoai.pages.dev/", script: scriptUrl, items };
@@ -211,7 +211,7 @@ async function media(request: Request, env: Env, sid: string, kind: "img"|"hls"|
     if ([301,302,303,307,308].includes(r.status)) {
       const loc = r.headers.get("location"); if (!loc) return r;
       const next = validPublicHttps(new URL(loc,u).toString());
-      return fetchMedia(next);
+      return fetchMedia(next, redirects + 1);
     }
     return r;
   };
