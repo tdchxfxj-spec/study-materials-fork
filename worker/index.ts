@@ -81,8 +81,14 @@ async function command(request: Request, env: Env, sid: string, cmd: string) {
     case "security_set": result = true; break;
     case "debug_log": result = null; break;
     case "net_diag": result = { mode: "cloudflare-worker", ok: true }; break;
-    case "cache_clear": result = null; break;\n    case "playback_log_status": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_set": result = { enabled: false, path: null, error: null }; break;\n    case "playback_log_write": result = null; break;\n    case "playback_log_read": result = ""; break;
-    case "open_url": result = null; break;\n    case "set_orientation": result = null; break;\n    case "plugin:app|exit": result = null; break;
+    case "cache_clear": result = null; break;
+    case "playback_log_status": result = { enabled: false, path: null, error: null }; break;
+    case "playback_log_set": result = { enabled: false, path: null, error: null }; break;
+    case "playback_log_write": result = null; break;
+    case "playback_log_read": result = ""; break;
+    case "open_url": result = null; break;
+    case "set_orientation": result = null; break;
+    case "plugin:app|exit": result = null; break;
     case "line_state": result = { base: s.origin, default: DEFAULT_ORIGIN, fixed: FIXED }; break;
     case "line_set": {
       const next = safeOrigin(String(args.url ?? ""));
